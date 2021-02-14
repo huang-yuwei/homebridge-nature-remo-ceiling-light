@@ -33,7 +33,7 @@ class NatureRemoCeilingLight {
 
     // the customizable button commands of ON button
     // user can add a series button command depends on their scene
-    this.namesOfOn = [config.namesOfOn || 'on-100'];
+    this.buttonsOfOn = config.buttonsOfOn || ['on-100'];
 
     // `service` is the instance of this HomeBridge accessory
     this.service = null;
@@ -89,13 +89,16 @@ class NatureRemoCeilingLight {
 
   async setApplianceToHomebridge(value, callback) {
     this.log.debug('Triggered SET:', value);
-
-    const params = {
-      button: value ? 'on-100' : 'off'
-    };
+    const isOn = !!value;
 
     try {
-      await this._updateApplianceToNatureRemo(params);
+      if(isOn) {
+        for(const button of this.buttonsOfOn) {
+          await this._updateApplianceToNatureRemo({ button: button });
+        }
+      }else{
+        await this._updateApplianceToNatureRemo({ button: 'off' });
+      }
     } catch(e) {
       this.log(e);
     }
