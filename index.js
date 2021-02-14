@@ -94,11 +94,44 @@ class NatureRemoCeilingLight {
       button: value ? 'on-100' : 'off'
     };
 
-    await this._updateTargetAppliance(params);
+    try {
+      await this._updateApplianceToNatureRemo(params);
+    } catch(e) {
+      this.log(e);
+    }
     callback();
   }
 
-  async _updateTargetAppliance(_params) {}
+  async _updateApplianceToNatureRemo(params) {
+    if(!params) throw Error('should at least contain params data');
+
+    this.log.debug(`making request for update: ${JSON.stringify(params)}`);
+    let requestParams = { ...params };
+
+    this.requestPromise = new Promise((resolve, reject) => {
+      setTimeout(() => {
+        this.log.debug(`requesting update to server: ${JSON.stringify(requestParams)}`);
+
+        const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, {
+          uri: `/appliances/${this.record.id}/light`,
+          headers: {'authorization': `Bearer ${this.accessToken}`},
+          method: 'POST',
+          form: requestParams
+        });
+
+        request(options, (_error, _response, _body) => {
+          this.log.debug('got reponse for updating appliance');
+          try {
+            resolve()
+          }catch(error) {
+            reject(`[ERROR] ${error}`);
+          }
+        });
+        delete this.requestPromise;
+      }, 80)
+    });
+    return this.requestPromise;
+  }
 
   _refreshAppliance() {}
 
