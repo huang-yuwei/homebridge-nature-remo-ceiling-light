@@ -97,4 +97,34 @@ class NatureRemoCeilingLight {
   async _updateTargetAppliance(_params) {}
 
   _refreshAppliance() {}
+
+  // the result from Nature Remo may be Response or Body base on the situation
+  _decodeRequestToJSON(error, response, body) {
+    let jsonOfResponse = null;
+    let jsonOfBody = null;
+
+    if(error || (!response && !body)) {
+      throw `failed to send the request. error: ${error}. response & body is empty`;
+    }
+
+    try {
+      jsonOfResponse = JSON.parse(response);
+      const isLegalRemoJSON = jsonOfResponse.some(j => !!j.id);
+
+      if(isLegalRemoJSON) return jsonOfResponse;
+    } catch(_e) {
+      jsonOfResponse = null;
+    }
+    
+    try {
+      jsonOfBody = JSON.parse(body);
+      const isLegalRemoJSON = jsonOfBody.some(j => !!j.id);
+      
+      if(isLegalRemoJSON) return jsonOfBody;
+    } catch(_e) {
+      jsonOfBody = null;
+    }
+
+    throw (`failed to get legal json result. response: ${response}. body: ${body}`);
+  }
 } 
