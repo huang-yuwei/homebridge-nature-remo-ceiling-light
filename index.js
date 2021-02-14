@@ -70,9 +70,13 @@ class NatureRemoCeilingLight {
       headers: {'authorization': `Bearer ${this.accessToken}`}
     });
     
-    request(options, (_error, _response, _body) => {
+    request(options, (error, response, body) => {
         try {
-          let device;
+          const json = this._decodeRequestToJSON(error, response, body);
+          const device = json.filter(
+            info => info.id === this.applianceId
+          )[0];
+
           state = device.light.state.power === 'on';
           this.log('set light status to:', state);
         } catch (e) {
