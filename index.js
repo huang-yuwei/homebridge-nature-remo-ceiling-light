@@ -46,7 +46,7 @@ class NatureRemoCeilingLight {
     // periodically refresh the target appliance information.
     this.updater = new cron.CronJob({
       cronTime: this.schedule,
-      onTick: this._refreshAppliance,
+      onTick: this.refreshAppliance,
       runOnInit: true
     });
     this.updater.start();
@@ -102,6 +102,15 @@ class NatureRemoCeilingLight {
     callback();
   }
 
+  async refreshAppliance() {
+    try {
+      const appliance = await this._requestTargetApplianceJSONFromNatureRemo();
+      this._refreshTargetAppliance(appliance);
+    } catch(e) {
+      this.log(e);
+    }
+  }
+
   async _updateApplianceToNatureRemo(params) {
     if(!params) throw Error('should at least contain params data');
 
@@ -133,7 +142,38 @@ class NatureRemoCeilingLight {
     return this.requestPromise;
   }
 
-  _refreshAppliance() {}
+  _requestTargetApplianceJSONFromNatureRemo() {
+    this.log('requesting target appliance record');
+    const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, {
+      uri: '/appliances',
+      headers: {'authorization': `Bearer ${this.accessToken}`}
+    });
+
+    return new Promise((resolve, reject) => {
+      request(options, (error, response, body) => {
+        try {
+          const json = this._decodeRequestToJSON(error, response, body);
+          resolve(json);
+        }catch(error) {
+          reject(`[ERROR] ${error}`);
+        }
+      });
+    })
+  }
+
+  _refreshTargetAppliance(applianceJSON) {
+    this.log('refesh target appliance');
+    
+    const appliance = applianceJSON.find((app) => {
+      return app.id === this.applianceId;
+    });
+    if(!appliance) throw Error('cannot find target appliance');
+
+    this.log.debug(`Target ID: ${appliance.id}`);
+    this.record = { ...appliance };
+    this.applianceId = appliance.id;  // persist discovered ID
+  }
+
 
   // the result from Nature Remo may be Response or Body base on the situation
   _decodeRequestToJSON(error, response, body) {
