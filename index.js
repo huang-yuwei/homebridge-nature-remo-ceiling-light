@@ -44,7 +44,7 @@ class NatureRemoCeilingLight {
     // periodically refresh the target appliance information.
     this.updater = new cron.CronJob({
       cronTime: this.schedule,
-      onTick: this.refreshAppliance,
+      onTick: this.refreshAppliance.bind(this),
       runOnInit: true
     });
     this.updater.start();
