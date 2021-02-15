@@ -41,8 +41,6 @@ class NatureRemoCeilingLight {
     // the cached data that receiving from the Nature Remo
     this.cached = null;
 
-    this.hasNotifiedConfiguration = false;
-
     // periodically refresh the target appliance information.
     this.updater = new cron.CronJob({
       cronTime: this.schedule,
