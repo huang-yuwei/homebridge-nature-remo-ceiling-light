@@ -125,7 +125,7 @@ class NatureRemoCeilingLight {
         this.log.debug(`requesting update to server: ${JSON.stringify(requestParams)}`);
 
         const options = Object.assign({}, DEFAULT_REQUEST_OPTIONS, {
-          uri: `/appliances/${this.record.id}/light`,
+          uri: `/appliances/${this.applianceId}/light`,
           headers: {'authorization': `Bearer ${this.accessToken}`},
           method: 'POST',
           form: requestParams
